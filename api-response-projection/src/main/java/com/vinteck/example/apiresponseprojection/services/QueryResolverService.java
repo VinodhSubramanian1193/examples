@@ -3,11 +3,15 @@ package com.vinteck.example.apiresponseprojection.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.*;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.mapper.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -22,11 +26,20 @@ public class QueryResolverService {
       throw new IllegalArgumentException("Query to map should not be null");
     if (!(payload instanceof Object))
       throw new IllegalArgumentException("Payload to be processed is not a java object");
-    String payloadString;
+    String payloadString = null;
     try {
-      payloadString = objectMapper.writeValueAsString(payload);
+      if(payload.getClass().isArray()) {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        objectMapper.writeValue(out, payload);
+        final byte[] data = out.toByteArray();
+        payloadString = new String(data);
+      } else {
+        payloadString = objectMapper.writeValueAsString(payload);
+      }
     } catch (JsonProcessingException e) {
       throw new RuntimeException("Not a well formed json", e);
+    } catch (IOException e) {
+      e.printStackTrace();
     }
 
     JsonElement payloadElement = JsonParser.parseString(payloadString);
@@ -38,10 +51,10 @@ public class QueryResolverService {
     return gson.toJson(response);
   }
 
-  private JsonElement parseJsonElements(JsonElement jsonElement, JsonElement payloadElement) {
+  private JsonElement parseJsonElements(JsonElement queryElement, JsonElement payloadElement) {
     JsonObject response = new JsonObject();
-    if(jsonElement.isJsonObject() && payloadElement.isJsonObject()) {
-      JsonObject asJsonObject = jsonElement.getAsJsonObject();
+    if(queryElement.isJsonObject() && payloadElement.isJsonObject()) {
+      JsonObject asJsonObject = queryElement.getAsJsonObject();
       JsonObject payloadJsonObject = payloadElement.getAsJsonObject();
       asJsonObject.entrySet().stream().forEach(stringJsonElementEntry1 -> {
         String key1 = stringJsonElementEntry1.getKey();
@@ -58,6 +71,10 @@ public class QueryResolverService {
               parseJsonArray(stringJsonElementEntry1.getValue(), payloadJsonSubElement));
         }
       });
+    } else if(queryElement.isJsonArray() && payloadElement.isJsonArray()){
+      return parseJsonArray(queryElement, payloadElement);
+    } else {
+      throw new RuntimeException("Not a valid query or payload response");
     }
     return response;
   }

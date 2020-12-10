@@ -19,12 +19,7 @@ public class ProjectionAspect {
   @Autowired private QueryResolverService queryResolverService;
 
   @Around(value = "allControllerEndpoints() && @annotation(projected)")
-  public ResponseEntity projectResponse(final ProceedingJoinPoint joinPoint, Projected projected) throws Throwable {
-
-    log.debug("Projected args query position: {}", projected.queryAtPosition());
-    Object[] joinPointArgs = joinPoint.getArgs();
-    String query = (String) joinPointArgs[projected.queryAtPosition()];
-    log.info("Projection enabled with query : {}", query);
+  public ResponseEntity projectResponseEntity(final ProceedingJoinPoint joinPoint, Projected projected) throws Throwable {
 
     ResponseEntity result = null;
     try {
@@ -32,7 +27,12 @@ public class ProjectionAspect {
     } catch (Throwable throwable) {
       throw throwable;
     } finally {
-      if(result != null) {
+      if(result != null && result.getStatusCode().is2xxSuccessful()) {
+        log.debug("Projected args query position: {}", projected.queryAtPosition());
+        Object[] joinPointArgs = joinPoint.getArgs();
+        String query = (String) joinPointArgs[projected.queryAtPosition()];
+        log.info("Projection enabled with query : {}", query);
+
         log.debug("ResponseObject : {}", result.getBody().toString());
         String resolve = queryResolverService.resolve(query, result.getBody());
         log.debug("Resolved obj : {}", resolve);
