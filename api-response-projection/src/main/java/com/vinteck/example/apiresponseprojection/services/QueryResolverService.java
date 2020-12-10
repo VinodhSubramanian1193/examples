@@ -1,5 +1,6 @@
 package com.vinteck.example.apiresponseprojection.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.*;
 import lombok.SneakyThrows;
@@ -15,31 +16,36 @@ public class QueryResolverService {
   @Autowired
   private ObjectMapper objectMapper;
 
-  @SneakyThrows
   public <T> String resolve(String query, T payload) {
-    log.info("Query to be resolved {}", query);
+    log.info("Starting query resolver for response type:{}.", payload.getClass().getSimpleName());
     if (StringUtils.isEmpty(query))
       throw new IllegalArgumentException("Query to map should not be null");
     if (!(payload instanceof Object))
       throw new IllegalArgumentException("Payload to be processed is not a java object");
-    JsonElement payloadElement;
-    String string = objectMapper.writeValueAsString(payload);
-    payloadElement = JsonParser.parseString(string);
-    JsonElement jsonElement = JsonParser.parseString(query);
+    String payloadString;
+    try {
+      payloadString = objectMapper.writeValueAsString(payload);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Not a well formed json", e);
+    }
 
-    JsonElement response = parseJsonElements(jsonElement, payloadElement);
+    JsonElement payloadElement = JsonParser.parseString(payloadString);
+    JsonElement queryElement = JsonParser.parseString(query);
+
+    JsonElement response = parseJsonElements(queryElement, payloadElement);
+    log.info("Query resolved successfully");
     Gson gson = new Gson();
     return gson.toJson(response);
   }
 
   private JsonElement parseJsonElements(JsonElement jsonElement, JsonElement payloadElement) {
     JsonObject response = new JsonObject();
-    if(jsonElement.isJsonObject() && payloadElement.isJsonObject()){
+    if(jsonElement.isJsonObject() && payloadElement.isJsonObject()) {
       JsonObject asJsonObject = jsonElement.getAsJsonObject();
       JsonObject payloadJsonObject = payloadElement.getAsJsonObject();
       asJsonObject.entrySet().stream().forEach(stringJsonElementEntry1 -> {
         String key1 = stringJsonElementEntry1.getKey();
-        if(!payloadJsonObject.has(key1)) throw new RuntimeException("Not a proper schema definition");
+        if(!payloadJsonObject.has(key1)) throw new RuntimeException("Not a valid query. please check");
 
         JsonElement payloadJsonSubElement = payloadJsonObject.get(key1);
         if(payloadJsonSubElement.isJsonPrimitive()){

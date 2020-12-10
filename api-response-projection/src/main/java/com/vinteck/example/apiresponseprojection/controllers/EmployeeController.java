@@ -1,17 +1,15 @@
 package com.vinteck.example.apiresponseprojection.controllers;
 
+import com.vinteck.example.apiresponseprojection.decorators.Projected;
 import com.vinteck.example.apiresponseprojection.domain.Address;
 import com.vinteck.example.apiresponseprojection.domain.Company;
 import com.vinteck.example.apiresponseprojection.domain.Employee;
 import com.vinteck.example.apiresponseprojection.domain.Person;
-import com.vinteck.example.apiresponseprojection.services.QueryResolverService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.yaml.snakeyaml.resolver.Resolver;
 
 import java.util.Arrays;
 
@@ -19,13 +17,9 @@ import java.util.Arrays;
 @RestController
 public class EmployeeController {
 
-  @Autowired
-  private QueryResolverService queryResolverService;
-
-  @PostMapping(value = "/company/{companyId}", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity getCompany(@PathVariable Integer companyId,
-                                   @RequestBody String query) {
-    log.info("Company requested for {}", companyId);
+  @Projected(queryAtPosition = 0)
+  @PostMapping(value = "/company", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity company(@RequestBody String query) {
     Company company = Company.builder()
         .name("XYZ")
         .noOfEmployees(10)
@@ -52,7 +46,11 @@ public class EmployeeController {
             .zipcode(123)
             .build())
         .build();
-    String resolve = queryResolverService.resolve(query, company);
-    return new ResponseEntity(resolve, HttpStatus.OK);
+    return new ResponseEntity(company, HttpStatus.OK);
+  }
+
+  @GetMapping("/hello")
+  public ResponseEntity hello(){
+    return new ResponseEntity("Hello World", HttpStatus.OK);
   }
 }

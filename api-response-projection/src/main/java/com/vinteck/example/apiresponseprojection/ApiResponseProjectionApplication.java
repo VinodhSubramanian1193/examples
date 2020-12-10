@@ -1,6 +1,7 @@
 package com.vinteck.example.apiresponseprojection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -20,5 +21,10 @@ public class ApiResponseProjectionApplication {
 	@Bean
 	public ObjectMapper objectMapper(){
 		return new ObjectMapper();
+	}
+
+	@Bean
+	public Gson gson() {
+		return new Gson();
 	}
 }

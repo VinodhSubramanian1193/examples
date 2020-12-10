@@ -5,14 +5,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.sun.jdi.ObjectCollectedException;
 import com.vinteck.example.apiresponseprojection.domain.Address;
 import com.vinteck.example.apiresponseprojection.domain.Company;
 import com.vinteck.example.apiresponseprojection.domain.Employee;
 import com.vinteck.example.apiresponseprojection.domain.Person;
 import lombok.SneakyThrows;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -33,7 +31,7 @@ public class QueryResolverServiceTest {
   @Mock private ObjectMapper objectMapper;
   @InjectMocks private QueryResolverService service;
 
-  private String query, simpleQuery, objectQuery, arrayQuery, fullQuery, payload;
+  private String simpleQuery, objectQuery, arrayQuery, fullQuery, payload;
   private Company company;
 
   @Before
@@ -142,8 +140,8 @@ public class QueryResolverServiceTest {
 
   @Test
   public void resolve_withFullQuery() {
-    arrayQuery = fullQuery = "{name:name, noOfEmployees:num, employees:[{empId:id, person:{firstName:firstName, lastName:surname, age:age}}], address: {street: street, area: area, zipcode: zipcode}}";
-    String resolvedResponse = service.resolve(arrayQuery, company);
+    fullQuery = "{name:name, noOfEmployees:num, employees:[{empId:id, person:{firstName:firstName, lastName:surname, age:age}}], address: {street: street, area: area, zipcode: zipcode}}";
+    String resolvedResponse = service.resolve(fullQuery, company);
     assertNotNull(resolvedResponse);
     JsonElement element = JsonParser.parseString(resolvedResponse);
     assertNotNull(element);
