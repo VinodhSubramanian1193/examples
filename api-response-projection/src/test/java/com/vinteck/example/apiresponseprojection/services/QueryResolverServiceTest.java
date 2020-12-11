@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.vinteck.example.apiresponseprojection.domain.Address;
 import com.vinteck.example.apiresponseprojection.domain.Company;
 import com.vinteck.example.apiresponseprojection.domain.Employee;
@@ -111,10 +110,7 @@ public class QueryResolverServiceTest {
   @Test
   public void resolve_withSimpleQuery() {
     simpleQuery = "{name: name, noOfEmployees: num}";
-    String resolvedResponse = service.resolve(simpleQuery, company);
-    assertNotNull(resolvedResponse);
-    JsonElement element = JsonParser.parseString(resolvedResponse);
-    assertNotNull(element);
+    JsonElement element = service.resolve(simpleQuery, company);
     assertTrue(element.isJsonObject());
     JsonObject asJsonObject = element.getAsJsonObject();
     Set<String> keySet = asJsonObject.keySet();
@@ -127,9 +123,7 @@ public class QueryResolverServiceTest {
   @Test
   public void resolve_withObjectQuery() {
     objectQuery = "{name: name, noOfEmployees: num, address: {street: street, area: areaName}}";
-    String resolvedResponse = service.resolve(objectQuery, company);
-    assertNotNull(resolvedResponse);
-    JsonElement element = JsonParser.parseString(resolvedResponse);
+    JsonElement element = service.resolve(objectQuery, company);
     assertNotNull(element);
     assertTrue(element.isJsonObject());
     JsonObject asJsonObject = element.getAsJsonObject();
@@ -151,9 +145,7 @@ public class QueryResolverServiceTest {
   @Test
   public void resolve_withArrayQuery() {
     arrayQuery = "{name:name, noOfEmployees:num, employees:[{empId:Id}], address: {street: street, area: area, zipcode: zipcode}}";
-    String resolvedResponse = service.resolve(arrayQuery, company);
-    assertNotNull(resolvedResponse);
-    JsonElement element = JsonParser.parseString(resolvedResponse);
+    JsonElement element = service.resolve(arrayQuery, company);
     assertNotNull(element);
     assertTrue(element.isJsonObject());
     JsonObject asJsonObject = element.getAsJsonObject();
@@ -175,9 +167,7 @@ public class QueryResolverServiceTest {
   @Test
   public void resolve_withFullQuery() {
     fullQuery = "{name:name, noOfEmployees:num, employees:[{empId:id, person:{firstName:firstName, lastName:surname, age:age}}], address: {street: street, area: area, zipcode: zipcode}}";
-    String resolvedResponse = service.resolve(fullQuery, company);
-    assertNotNull(resolvedResponse);
-    JsonElement element = JsonParser.parseString(resolvedResponse);
+    JsonElement element = service.resolve(fullQuery, company);
     assertNotNull(element);
     assertTrue(element.isJsonObject());
     JsonObject asJsonObject = element.getAsJsonObject();
@@ -215,9 +205,7 @@ public class QueryResolverServiceTest {
       }
       return null;
     }).when(objectMapper).writeValue(any(OutputStream.class), eq(companies));
-    String resolvedResponse = service.resolve(arrayOfJson, companies);
-    assertNotNull(resolvedResponse);
-    JsonElement element = JsonParser.parseString(resolvedResponse);
+    JsonElement element = service.resolve(arrayOfJson, companies);
     assertNotNull(element);
     assertTrue(element.isJsonArray());
     JsonArray asJsonArray = element.getAsJsonArray();

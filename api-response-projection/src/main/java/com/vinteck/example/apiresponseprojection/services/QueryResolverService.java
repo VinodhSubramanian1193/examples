@@ -18,7 +18,7 @@ public class QueryResolverService {
   @Autowired
   private ObjectMapper objectMapper;
 
-  public <T> String resolve(String query, T payload) {
+  public <T> JsonElement resolve(String query, T payload) {
     log.info("Starting query resolver for response type:{}.", payload.getClass().getSimpleName());
     if (StringUtils.isEmpty(query))
       throw new IllegalArgumentException("Query to map should not be null");
@@ -45,8 +45,7 @@ public class QueryResolverService {
 
     JsonElement response = parseJsonElements(queryElement, payloadElement);
     log.info("Query resolved successfully");
-    Gson gson = new Gson();
-    return gson.toJson(response);
+    return response;
   }
 
   private JsonElement parseJsonElements(JsonElement queryElement, JsonElement payloadElement) {
