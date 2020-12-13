@@ -77,12 +77,12 @@ public class QueryResolverService {
     return response;
   }
 
-  private JsonElement parseJsonArray(JsonElement jsonElement, JsonElement payloadJsonElement) {
-      if(!jsonElement.isJsonArray()) throw new RuntimeException("Not a valid query. please check");
+  private JsonElement parseJsonArray(JsonElement queryJsonElement, JsonElement payloadJsonElement) {
+      if(!queryJsonElement.isJsonArray()) throw new RuntimeException("Not a valid query. please check");
       JsonArray asJsonArray = payloadJsonElement.getAsJsonArray();
       JsonArray jsonObjects = new JsonArray();
       for (JsonElement arrayElement: asJsonArray) {
-        jsonObjects.add(parseJsonElements(jsonElement.getAsJsonArray().get(0), arrayElement));
+        jsonObjects.add(parseJsonElements(queryJsonElement.getAsJsonArray().get(0), arrayElement));
       }
     return jsonObjects;
   }

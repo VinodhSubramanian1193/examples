@@ -12,6 +12,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +42,7 @@ public class ProjectionAspect {
         log.debug("ResponseObject : {}", result.getBody().toString());
         HttpHeaders headers = new HttpHeaders();
         headers.addAll(result.getHeaders());
+        headers.setContentType(MediaType.APPLICATION_JSON);
         try {
           JsonElement resolve = queryResolverService.resolve(query, result.getBody());
           Gson gson = new Gson();
