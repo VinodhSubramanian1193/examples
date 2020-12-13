@@ -53,19 +53,20 @@ public class QueryResolverService {
     if(queryElement.isJsonObject() && payloadElement.isJsonObject()) {
       JsonObject asJsonObject = queryElement.getAsJsonObject();
       JsonObject payloadJsonObject = payloadElement.getAsJsonObject();
-      asJsonObject.entrySet().stream().forEach(stringJsonElementEntry1 -> {
-        String key1 = stringJsonElementEntry1.getKey();
+      asJsonObject.entrySet().stream().forEach(element -> {
+        String key1 = element.getKey();
         if(!payloadJsonObject.has(key1)) throw new RuntimeException("Not a valid query. please check");
 
         JsonElement payloadJsonSubElement = payloadJsonObject.get(key1);
         if(payloadJsonSubElement.isJsonPrimitive()){
-          response.addProperty(stringJsonElementEntry1.getValue().getAsString(), payloadJsonSubElement.getAsString());
+          //setting the key as the value to support alias for primitive types
+          response.addProperty(element.getValue().getAsString(), payloadJsonSubElement.getAsString());
         } else if (payloadJsonSubElement.isJsonObject()){
-          response.add(stringJsonElementEntry1.getKey(),
-              parseJsonElements(stringJsonElementEntry1.getValue(), payloadJsonSubElement));
+          response.add(element.getKey(),
+              parseJsonElements(element.getValue(), payloadJsonSubElement));
         } else if (payloadJsonSubElement.isJsonArray()){
-          response.add(stringJsonElementEntry1.getKey(),
-              parseJsonArray(stringJsonElementEntry1.getValue(), payloadJsonSubElement));
+          response.add(element.getKey(),
+              parseJsonArray(element.getValue(), payloadJsonSubElement));
         }
       });
     } else if(queryElement.isJsonArray() && payloadElement.isJsonArray()){
